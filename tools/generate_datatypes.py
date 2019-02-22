@@ -239,12 +239,9 @@ class EnumerationType(Type):
                 self.elements[child.get("Name")] = child.get("Value")
 
     def typedef_h(self):
-        if sys.version_info[0] < 3:
-            values = self.elements.iteritems()
-        else:
-            values = self.elements.items()
-        return "typedef enum {\n    " + ",\n    ".join(map(lambda kv : makeCIdentifier("UA_" + self.name.upper() + "_" + kv[0].upper()) + \
-                                                           " = " + kv[1], values)) + \
+        names = map(lambda kv : makeCIdentifier("UA_" + self.name.upper() + "_" + kv[0].upper()) + \
+                                                           " = " + kv[1], self.elements.items())
+        return "typedef enum {\n    " + ",\n    ".join(names) + \
                ",\n    __UA_{0}_FORCE32BIT = 0x7fffffff\n".format(makeCIdentifier(self.name.upper())) + "} " + \
                "UA_{0};\nUA_STATIC_ASSERT(sizeof(UA_{0}) == sizeof(UA_Int32), enum_must_be_32bit);".format(makeCIdentifier(self.name))
 
@@ -533,11 +530,7 @@ def printc(string):
     print(string, end='\n', file=fc)
 
 def iter_types(v):
-    l = None
-    if sys.version_info[0] < 3:
-        l = list(v.itervalues())
-    else:
-        l = list(v.values())
+    l = list(v.values())
     if len(selected_types) > 0:
         l = list(filter(lambda t: t.name in selected_types, l))
     if args.no_builtin:

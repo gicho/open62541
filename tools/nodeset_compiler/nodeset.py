@@ -16,26 +16,23 @@
 ### this program.
 ###
 
-from __future__ import print_function
 import sys
+MIN_PYTHON = (3, 0)
+if sys.version_info < MIN_PYTHON:
+    sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
+
+from __future__ import print_function
 import xml.dom.minidom as dom
 import logging
 import codecs
 import re
-import six
-
-__all__ = ['NodeSet', 'getSubTypesOf']
-
-logger = logging.getLogger(__name__)
-
 from datatypes import *
 from nodes import *
 from opaque_type_mapping import opaque_type_mapping
 
-if sys.version_info[0] >= 3:
-    # strings are already parsed to unicode
-    def unicode(s):
-        return s
+__all__ = ['NodeSet', 'getSubTypesOf']
+
+logger = logging.getLogger(__name__)
 
 ####################
 # Helper Functions #
@@ -214,8 +211,7 @@ class NodeSet(object):
         # Remove BOM since the dom parser cannot handle it on python 3 windows
         if fileContent.startswith( codecs.BOM_UTF8 ):
             fileContent = fileContent.lstrip( codecs.BOM_UTF8 )
-        if (sys.version_info >= (3, 0)):
-            fileContent = fileContent.decode("utf-8")
+        fileContent = fileContent.decode("utf-8")
 
         # Remove the uax namespace from tags. UaModeler adds this namespace to some elements
         fileContent = re.sub(r"<([/]?)uax:(.+?)([/]?)>", "<\g<1>\g<2>\g<3>>", fileContent)
@@ -225,7 +221,6 @@ class NodeSet(object):
             raise Exception(self, self.originXML + " contains no or more then 1 nodeset")
         nodeset = nodesets[0]
 
-
         # Extract the modelUri
         try:
             modelTag = nodeset.getElementsByTagName("Models")[0].getElementsByTagName("Model")[0]
@@ -233,7 +228,6 @@ class NodeSet(object):
         except Exception:
             # Ignore exception and try to use namespace array
             modelUri = None
-
 
         # Create the namespace mapping
         orig_namespaces = extractNamespaces(xmlfile)  # List of namespaces used in the xml file
@@ -317,7 +311,7 @@ class NodeSet(object):
         return node
                 
     def getDataTypeNode(self, dataType):
-        if isinstance(dataType, six.string_types):
+        if isinstance(dataType, str):
             if not valueIsInternalType(dataType):
                 logger.error("Not a valid dataType string: " + dataType)
                 return None

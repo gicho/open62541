@@ -8,16 +8,9 @@
 import os
 import re
 import io
-import sys
 
 from git import *
 from shutil import move
-
-if sys.version_info[0] >= 3:
-    # strings are already parsed to unicode
-    def unicode(s):
-        return s
-
 
 # Replace the name by another value, i.e. add affiliation or replace user name by full name
 # only use lower case name
@@ -70,7 +63,7 @@ fileAuthorStats = dict()
 def insertCopyrightAuthors(file, authorsList):
     copyrightEntries = list()
     for author in authorsList:
-        copyrightEntries.append(unicode("Copyright {} (c) {}").format(compactYears(author['years']), author['author']))
+        copyrightEntries.append("Copyright {} (c) {}".format(compactYears(author['years']), author['author']))
 
     copyrightAdded = False
     commentPattern = re.compile(r"(.*)\*/$")
@@ -84,8 +77,8 @@ def insertCopyrightAuthors(file, authorsList):
             else:
                 tempFile.write(commentPattern.match(line).group(1) + "\n *\n")
                 for e in copyrightEntries:
-                    tempFile.write(unicode(" *    {}\n").format(e))
-                tempFile.write(unicode(" */\n"))
+                    tempFile.write(" *    {}\n".format(e))
+                tempFile.write(" */\n")
                 copyrightAdded = True
     tempFile.close()
     os.unlink(file)
@@ -188,7 +181,7 @@ def buildFileStats(repo):
                 if not newFile in fileAuthorStats:
                     fileAuthorStats[newFile] = dict()
 
-                authorName = unicode(commit.author.name)
+                authorName = commit.author.name
                 if authorName in assumeSameAuthor:
                     authorName = assumeSameAuthor[authorName]
 

@@ -16,7 +16,6 @@
 ### this program.
 ###
 
-import sys
 import logging
 from datatypes import *
 
@@ -25,11 +24,6 @@ __all__ = ['Reference', 'RefOrAlias', 'Node', 'ReferenceTypeNode',
            'MethodNode', 'ObjectTypeNode', 'DataTypeNode', 'ViewNode']
 
 logger = logging.getLogger(__name__)
-
-if sys.version_info[0] >= 3:
-    # strings are already parsed to unicode
-    def unicode(s):
-        return s
 
 class Reference(object):
     # all either nodeids or strings with an alias
@@ -120,9 +114,9 @@ class Node(object):
                 elif x.localName == "Description":
                     self.description = LocalizedText(x.firstChild.data)
                 elif x.localName == "WriteMask":
-                    self.writeMask = int(unicode(x.firstChild.data))
+                    self.writeMask = int(x.firstChild.data)
                 elif x.localName == "UserWriteMask":
-                    self.userWriteMask = int(unicode(x.firstChild.data))
+                    self.userWriteMask = int(x.firstChild.data)
                 if x.localName == "References":
                     self.parseXMLReferences(x)
 
@@ -213,7 +207,7 @@ class ReferenceTypeNode(Node):
         for x in xmlelement.childNodes:
             if x.nodeType == x.ELEMENT_NODE:
                 if x.localName == "InverseName" and x.firstChild:
-                    self.inverseName = str(unicode(x.firstChild.data))
+                    self.inverseName = str(x.firstChild.data)
 
 class ObjectNode(Node):
     def __init__(self, xmlelement=None):
@@ -268,18 +262,18 @@ class VariableNode(Node):
             elif x.localName == "DataType":
                 self.dataType = RefOrAlias(av)
             elif x.localName == "ValueRank":
-                self.valueRank = int(unicode(x.firstChild.data))
+                self.valueRank = int(x.firstChild.data)
             elif x.localName == "ArrayDimensions" and len(self.arrayDimensions) == 0:
                 elements = x.getElementsByTagName("ListOfUInt32");
                 if len(elements):
                     for idx, v in enumerate(elements[0].getElementsByTagName("UInt32")):
                         self.arrayDimensions.append(v.firstChild.data)
             elif x.localName == "AccessLevel":
-                self.accessLevel = int(unicode(x.firstChild.data))
+                self.accessLevel = int(x.firstChild.data)
             elif x.localName == "UserAccessLevel":
-                self.userAccessLevel = int(unicode(x.firstChild.data))
+                self.userAccessLevel = int(x.firstChild.data)
             elif x.localName == "MinimumSamplingInterval":
-                self.minimumSamplingInterval = float(unicode(x.firstChild.data))
+                self.minimumSamplingInterval = float(x.firstChild.data)
             elif x.localName == "Historizing":
                 self.historizing = "false" not in x.lower()
 

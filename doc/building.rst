@@ -22,14 +22,14 @@ Building with CMake on Ubuntu or Debian
 
 .. code-block:: bash
 
-   sudo apt-get install git build-essential gcc pkg-config cmake python python-six
+   sudo apt-get install git build-essential gcc pkg-config cmake python3
 
    # enable additional features
    sudo apt-get install cmake-curses-gui # for the ccmake graphical interface
    sudo apt-get install libmbedtls-dev # for encryption support
    sudo apt-get install check # for unit tests
-   sudo apt-get install python-sphinx graphviz # for documentation generation
-   sudo apt-get install python-sphinx-rtd-theme # documentation style
+   sudo apt-get install python3-sphinx graphviz # for documentation generation
+   sudo apt-get install python3-sphinx-rtd-theme # documentation style
 
    cd open62541
    mkdir build
@@ -53,8 +53,7 @@ with MinGW, just replace the compiler selection in the call to CMake.
 
 - Download and install
 
-  - Python 2.7.x (Python 3.x works as well): https://python.org/downloads
-  - Install python-six with the pip package manager (``pip install six``)
+  - Python 3.x: https://python.org/downloads
   - CMake: http://www.cmake.org/cmake/resources/software.html
   - Microsoft Visual Studio: https://www.visualstudio.com/products/visual-studio-community-vs
 
@@ -85,7 +84,6 @@ Building on OS X
 .. code-block:: bash
 
    brew install cmake
-   pip install six # python 2/3 compatibility workarounds
    pip install sphinx # for documentation generation
    pip install sphinx_rtd_theme # documentation style
    brew install graphviz # for graphics in the documentation
@@ -95,13 +93,12 @@ Follow Ubuntu instructions without the ``apt-get`` commands as these are taken c
 
 Building on OpenBSD
 ^^^^^^^^^^^^^^^^^^^
-The procedure below works on OpenBSD 5.8 with gcc version 4.8.4, cmake version 3.2.3 and Python version 2.7.10.
 
-- Install a recent gcc, python and cmake:
+- Install a recent gcc, python3 and cmake:
 
 .. code-block:: bash
    
-   pkg_add gcc python cmake
+   pkg_add gcc python3 cmake
 
 - Tell the system to actually use the recent gcc (it gets installed as egcc on OpenBSD): 
 
@@ -118,7 +115,6 @@ The procedure below works on OpenBSD 5.8 with gcc version 4.8.4, cmake version 3
    cd build
    cmake ..
    make
-
 
 .. _build_options:
 

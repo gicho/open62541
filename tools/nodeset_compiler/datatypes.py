@@ -17,9 +17,14 @@
 ###
 
 import sys
+MIN_PYTHON = (3, 0)
+if sys.version_info < MIN_PYTHON:
+    sys.exit("Python %s.%s or later is required.\n" % MIN_PYTHON)
+
 import logging
 from datetime import datetime
-
+import xml.dom.minidom as dom
+from base64 import *
 
 __all__ = ['valueIsInternalType', 'Value', 'Boolean', 'Number', 'Integer',
            'UInteger', 'Byte', 'SByte',
@@ -29,17 +34,6 @@ __all__ = ['valueIsInternalType', 'Value', 'Boolean', 'Number', 'Integer',
            'DiagnosticInfo', 'Guid']
 
 logger = logging.getLogger(__name__)
-import xml.dom.minidom as dom
-
-from base64 import *
-
-import six
-
-if sys.version_info[0] >= 3:
-    # strings are already parsed to unicode
-    def unicode(s):
-        return s
-
 
 def getNextElementNode(xmlvalue):
     if xmlvalue is None:
@@ -187,7 +181,7 @@ class Value(object):
         if len(enc) == 1:
             # 0: ['BuiltinType']          either builtin type
             # 1: [ [ 'Alias', [...], n] ] or single alias for possible multipart
-            if isinstance(enc[0], six.string_types):
+            if isinstance(enc[0], str):
                 # 0: 'BuiltinType'
                 if alias is not None:
                     if not xmlvalue.localName == alias and not xmlvalue.localName == enc[0]:
@@ -213,7 +207,7 @@ class Value(object):
                 return self.__parseXMLSingleValue(xmlvalue, parentDataTypeNode, parent,
                                                   namespaceMapping=namespaceMapping,
                                                   alias=alias, encodingPart=enc[0], valueRank=enc[2] if len(enc)>2 else None)
-        elif len(enc) == 3 and isinstance(enc[0], six.string_types):
+        elif len(enc) == 3 and isinstance(enc[0], str):
             # [ 'Alias', [...], 0 ]          aliased multipart
             if alias is None:
                 alias = enc[0]
@@ -310,7 +304,7 @@ class Boolean(Value):
         if xmlvalue.firstChild is None:
             self.value = "false"  # Catch XML <Boolean /> by setting the value to a default
         else:
-            if "false" in unicode(xmlvalue.firstChild.data).lower():
+            if "false" in xmlvalue.firstChild.data.lower():
                 self.value = "false"
             else:
                 self.value = "true"
@@ -328,7 +322,7 @@ class Number(Value):
         if xmlvalue.firstChild is None:
             self.value = 0  # Catch XML <Int16 /> by setting the value to a default
         else:
-            self.value = int(unicode(xmlvalue.firstChild.data))
+            self.value = int(xmlvalue.firstChild.data)
 
 class Integer(Number):
     def __init__(self, xmlelement=None):
@@ -403,7 +397,7 @@ class Float(Number):
         if xmlvalue.firstChild is None:
             self.value = 0.0  # Catch XML <Float /> by setting the value to a default
         else:
-            self.value = float(unicode(xmlvalue.firstChild.data))
+            self.value = float(xmlvalue.firstChild.data)
 
 class Double(Float):
     def __init__(self, xmlelement=None):
@@ -418,7 +412,7 @@ class String(Value):
             self.parseXML(xmlelement)
 
     def pack(self):
-        bin = structpack("I", len(unicode(self.value)))
+        bin = structpack("I", len(self.value))
         bin = bin + str(self.value)
         return bin
 
@@ -432,7 +426,7 @@ class String(Value):
         if xmlvalue.firstChild is None:
             self.value = ""  # Catch XML <String /> by setting the value to a default
         else:
-            self.value = unicode(xmlvalue.firstChild.data)
+            self.value = xmlvalue.firstChild.data
 
 class XmlElement(String):
     def __init__(self, xmlelement=None):
@@ -554,7 +548,7 @@ class NodeId(Value):
             # Check if there is an <Identifier> tag
             if len(xmlvalue.getElementsByTagName("Identifier")) != 0:
                 xmlvalue = xmlvalue.getElementsByTagName("Identifier")[0]
-            self.setFromIdString(unicode(xmlvalue.firstChild.data))
+            self.setFromIdString(xmlvalue.firstChild.data)
             if namespaceMapping is not None:
                 self.ns = namespaceMapping[self.ns]
 
@@ -613,7 +607,7 @@ class DateTime(Value):
             # Catch XML <DateTime /> by setting the value to a default
             self.value = datetime(2001, 1, 1)
         else:
-            timestr = unicode(xmlvalue.firstChild.data)
+            timestr = xmlvalue.firstChild.data
             # .NET tends to create this garbage %Y-%m-%dT%H:%M:%S.0000z
             # strip everything after the "." away for a posix time_struct
             if "." in timestr:
@@ -693,7 +687,7 @@ class Guid(Value):
         if xmlvalue.firstChild is None:
             self.value = [0, 0, 0, 0]  # Catch XML <Guid /> by setting the value to a default
         else:
-            self.value = unicode(xmlvalue.firstChild.data)
+            self.value = xmlvalue.firstChild.data
             self.value = self.value.replace("{", "")
             self.value = self.value.replace("}", "")
             self.value = self.value.split("-")
@@ -702,11 +696,9 @@ class Guid(Value):
                 try:
                     tmp.append(int("0x" + g, 16))
                 except Exception:
-                    logger.error("Invalid formatting of Guid. Expected {01234567-89AB-CDEF-ABCD-0123456789AB}, got " + \
-                                 unicode(xmlvalue.firstChild.data))
+                    logger.error("Invalid formatting of Guid. Expected {01234567-89AB-CDEF-ABCD-0123456789AB}, got " + xmlvalue.firstChild.data)
                     tmp = [0, 0, 0, 0, 0]
             if len(tmp) != 5:
-                logger.error("Invalid formatting of Guid. Expected {01234567-89AB-CDEF-ABCD-0123456789AB}, got " + \
-                             unicode(xmlvalue.firstChild.data))
+                logger.error("Invalid formatting of Guid. Expected {01234567-89AB-CDEF-ABCD-0123456789AB}, got " + xmlvalue.firstChild.data)
                 tmp = [0, 0, 0, 0]
             self.value = tmp
