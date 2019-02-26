@@ -3,8 +3,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        sh 'echo "Tess buidl step"'
-        sh 'echo "Step 2"'
+        echo 'First test  message...'
       }
     }
   }
